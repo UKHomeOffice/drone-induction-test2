@@ -6,7 +6,7 @@ pipeline:
     environment:
       - DOCKER_HOST=tcp://127.0.0.1:2375
     commands:
-      - docker build -t image_name .
+      - docker build -t kc_dsp_induction .
     when:
       branch: master
       event: push
@@ -18,3 +18,15 @@ services:
     command:
       - "-s"
       - "overlay"
+
+image_to_quay:
+  image: docker:1.11
+  environment:
+    - DOCKER_HOST=tcp://127.0.0.1:2375
+  commands:
+    - docker login -u="kriscov-ibm" -p=${DOCKER_PASSWORD} quay.io
+    - docker tag kc_dsp_induction quay.io/ukhomeofficedigital/dsp-induction2:${DRONE_COMMIT_SHA}
+    - docker push quay.io/ukhomeofficedigital/dsp-induction2:${DRONE_COMMIT_SHA}
+  when:
+    branch: master
+    event: push
